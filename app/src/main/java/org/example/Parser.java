@@ -35,14 +35,28 @@ class Parser {
     }
 
     private Expr ternary() {
-        Expr expr = equality();
+        Expr expr = badBinaryOrEquality();
         if (match(TokenType.QUESTION_MARK)) {
-            Expr left = equality();
+            Expr left = badBinaryOrEquality();
             consume(TokenType.COLON, "Expect ':' after '?'.");
-            Expr right = equality();
+            Expr right = badBinaryOrEquality();
             return new Expr.Ternary(left, expr, right);
         }
         return expr;
+    }
+
+    private Expr badBinaryOrEquality() {
+        if (check(TokenType.SLASH, TokenType.STAR, TokenType.PLUS, TokenType.GREATER, TokenType.GREATER_EQUAL,
+                TokenType.LESS, TokenType.LESS_EQUAL, TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
+            Token problem = peek();
+            advance();
+            try {
+                expression();
+            } catch (ParseError error) {
+            }
+            throw error(problem, "Expected left side operand.");
+        }
+        return equality();
     }
 
     private Expr equality() {
@@ -142,10 +156,15 @@ class Parser {
         throw error(peek(), message);
     }
 
-    private boolean check(TokenType type) {
+    private boolean check(TokenType... types) {
         if (isAtEnd())
             return false;
-        return peek().type == type;
+        for (TokenType type : types) {
+            if (peek().type == type) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Token advance() {
