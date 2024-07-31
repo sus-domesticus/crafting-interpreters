@@ -23,7 +23,15 @@ class Parser {
     }
 
     private Expr expression() {
-        return equality();
+        return comma();
+    }
+
+    private Expr comma() {
+        Expr expr = equality();
+        while (match(TokenType.COMMA)) {
+            expr = equality();
+        }
+        return expr;
     }
 
     private Expr equality() {
