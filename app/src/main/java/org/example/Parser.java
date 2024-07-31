@@ -2,7 +2,7 @@ package org.example;
 
 import java.util.List;
 
-// TODO: do the challenges in [chapter 6](https://craftinginterpreters.com/parsing-expressions.html)
+// TODO: continue from [here](https://craftinginterpreters.com/evaluating-expressions.html#representing-values).
 class Parser {
     private static class ParseError extends RuntimeException {
     }
