@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.Expr.Ternary;
+
 class AstPrinter implements Expr.Visitor<String> {
     String print(Expr expr) {
         return expr.accept(this);
@@ -39,6 +41,23 @@ class AstPrinter implements Expr.Visitor<String> {
         builder.append(name);
         builder.append(")");
 
+        return builder.toString();
+    }
+
+    @Override
+    public String visitTernaryExpr(Ternary expr) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(");
+        builder.append(expr.left.accept(this));
+        builder.append(" ");
+        builder.append("if");
+        builder.append(" ");
+        builder.append(expr.condition.accept(this));
+        builder.append(" ");
+        builder.append("else");
+        builder.append(" ");
+        builder.append(expr.right.accept(this));
+        builder.append(")");
         return builder.toString();
     }
 }

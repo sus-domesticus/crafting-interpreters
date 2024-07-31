@@ -27,9 +27,20 @@ class Parser {
     }
 
     private Expr comma() {
-        Expr expr = equality();
+        Expr expr = ternary();
         while (match(TokenType.COMMA)) {
-            expr = equality();
+            expr = ternary();
+        }
+        return expr;
+    }
+
+    private Expr ternary() {
+        Expr expr = equality();
+        if (match(TokenType.QUESTION_MARK)) {
+            Expr left = equality();
+            consume(TokenType.COLON, "Expect ':' after '?'.");
+            Expr right = equality();
+            return new Expr.Ternary(left, expr, right);
         }
         return expr;
     }

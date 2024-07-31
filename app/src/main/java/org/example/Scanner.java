@@ -4,6 +4,7 @@ import static org.example.TokenType.AND;
 import static org.example.TokenType.BANG;
 import static org.example.TokenType.BANG_EQUAL;
 import static org.example.TokenType.CLASS;
+import static org.example.TokenType.COLON;
 import static org.example.TokenType.COMMA;
 import static org.example.TokenType.DOT;
 import static org.example.TokenType.ELSE;
@@ -27,6 +28,7 @@ import static org.example.TokenType.NUMBER;
 import static org.example.TokenType.OR;
 import static org.example.TokenType.PLUS;
 import static org.example.TokenType.PRINT;
+import static org.example.TokenType.QUESTION_MARK;
 import static org.example.TokenType.RETURN;
 import static org.example.TokenType.RIGHT_BRACE;
 import static org.example.TokenType.RIGHT_PAREN;
@@ -92,6 +94,12 @@ class Scanner {
     private void scanToken() {
         char c = advance();
         switch (c) {
+            case '?':
+                addToken(QUESTION_MARK);
+                break;
+            case ':':
+                addToken(COLON);
+                break;
             case '(':
                 addToken(LEFT_PAREN);
                 break;
