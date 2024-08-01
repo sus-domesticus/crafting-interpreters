@@ -59,7 +59,17 @@ class Interpreter implements Expr.Visitor<Object> {
                 if (left instanceof String && right instanceof String) {
                     return (String) left + (String) right;
                 }
-                throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
+
+                if (left instanceof String && right instanceof Double) {
+                    return (String) left + stripDouble(((Double) right).toString());
+                }
+
+                if (left instanceof Double && right instanceof String) {
+                    return stripDouble(((Double) left).toString()) + (String) right;
+                }
+
+                throw new RuntimeError(expr.operator,
+                        "Operands must be two numbers, two strings or a mix of a number and a string.");
             case SLASH:
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left / (double) right;
@@ -69,6 +79,13 @@ class Interpreter implements Expr.Visitor<Object> {
             default:
                 throw new RuntimeException("Unknown binary operator: " + expr.operator.type);
         }
+    }
+
+    private String stripDouble(String doubleRepresentation) {
+        if (doubleRepresentation.endsWith(".0")) {
+            return doubleRepresentation.substring(0, doubleRepresentation.length() - 2);
+        }
+        return doubleRepresentation;
     }
 
     @Override
