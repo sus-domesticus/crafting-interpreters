@@ -3,6 +3,7 @@ package org.example;
 import static org.example.TokenType.AND;
 import static org.example.TokenType.BANG;
 import static org.example.TokenType.BANG_EQUAL;
+import static org.example.TokenType.BREAK;
 import static org.example.TokenType.CLASS;
 import static org.example.TokenType.COLON;
 import static org.example.TokenType.COMMA;
@@ -60,6 +61,7 @@ class Scanner {
         keywords.put("fun", FUN);
         keywords.put("if", IF);
         keywords.put("nil", NIL);
+        keywords.put("break", BREAK);
         keywords.put("or", OR);
         keywords.put("print", PRINT);
         keywords.put("return", RETURN);

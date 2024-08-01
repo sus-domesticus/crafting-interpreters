@@ -56,6 +56,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
             for (Stmt statement : statements) {
                 execute(statement);
+                if (breakActive) {
+                    break;
+                }
             }
         } finally {
             this.environment = previous;
@@ -106,7 +109,19 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitWhileStmt(Stmt.While stmt) {
         while (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.body);
+            if (breakActive) {
+                breakActive = false;
+                break;
+            }
         }
+        return null;
+    }
+
+    private Boolean breakActive = false;
+
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        breakActive = true;
         return null;
     }
 

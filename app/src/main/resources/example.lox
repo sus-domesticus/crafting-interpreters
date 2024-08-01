@@ -1,0 +1,16 @@
+for (var x = 1; x <= 1000; x = x + 1) {
+  print x;
+  for (var y = 1; y < 10; y = y + 1) {
+      print y;
+      {
+        {
+          break;
+        }
+      }
+    }
+  if (x - 9 == 900) {
+    if (x - 10 == 899) {
+      break;
+    }
+  }
+}
