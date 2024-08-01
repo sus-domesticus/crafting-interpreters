@@ -3,7 +3,7 @@ package org.example;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: continue from [here](https://craftinginterpreters.com/evaluating-expressions.html#representing-values).
+// TODO: continue from [here](https://craftinginterpreters.com/control-flow.html#while-loops).
 class Parser {
     private static class ParseError extends RuntimeException {
     }
