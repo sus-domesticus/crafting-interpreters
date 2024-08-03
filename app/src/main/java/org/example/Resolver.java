@@ -7,8 +7,20 @@ import java.util.Stack;
 
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
-    private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private final Stack<Map<String, VarState>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
+
+    private class VarState {
+        public VarState(Token name, Boolean ready, Boolean used) {
+            this.name = name;
+            this.ready = ready;
+            this.used = used;
+        }
+
+        public Token name;
+        public Boolean ready;
+        public Boolean used;
+    };
 
     Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -139,7 +151,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitVariableExpr(Expr.Variable expr) {
         if (!scopes.isEmpty() &&
-                scopes.peek().get(expr.name.lexeme) == Boolean.FALSE) {
+                scopes.peek().get(expr.name.lexeme).ready == Boolean.FALSE) {
             App.error(expr.name,
                     "Can't read local variable in its own initializer.");
         }
@@ -178,10 +190,16 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     private void beginScope() {
-        scopes.push(new HashMap<String, Boolean>());
+        scopes.push(new HashMap<String, VarState>());
     }
 
     private void endScope() {
+        for (Map.Entry<String, VarState> entry : scopes.peek().entrySet()) {
+            if (entry.getValue().used == Boolean.FALSE) {
+                App.error(entry.getValue().name,
+                        "Unused variable '" + entry.getKey() + "'.");
+            }
+        }
         scopes.pop();
     }
 
@@ -189,21 +207,24 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         if (scopes.isEmpty())
             return;
 
-        Map<String, Boolean> scope = scopes.peek();
+        Map<String, VarState> scope = scopes.peek();
         if (scope.containsKey(name.lexeme)) {
             App.error(name,
                     "Already a variable with this name in this scope.");
         }
-        scope.put(name.lexeme, false);
+        scope.put(name.lexeme, new VarState(name, false, false));
     }
 
     private void define(Token name) {
         if (scopes.isEmpty())
             return;
-        scopes.peek().put(name.lexeme, true);
+        scopes.peek().put(name.lexeme, new VarState(name, true, false));
     }
 
     private void resolveLocal(Expr expr, Token name) {
+        if (!scopes.isEmpty()) {
+            scopes.peek().put(name.lexeme, new VarState(name, true, true));
+        }
         for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(name.lexeme)) {
                 interpreter.resolve(expr, scopes.size() - 1 - i);
