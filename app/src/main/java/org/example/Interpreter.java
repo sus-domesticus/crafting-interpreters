@@ -265,6 +265,12 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return environment.get(expr.name);
     }
 
+    @Override
+    public Object visitClojureExpr(Expr.Clojure expr) {
+        LoxClojure clojure = new LoxClojure(expr, environment);
+        return clojure;
+    }
+
     private void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double)
             return;

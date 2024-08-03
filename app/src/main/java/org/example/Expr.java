@@ -5,6 +5,7 @@ import java.util.List;
 abstract class Expr {
   interface Visitor<R> {
     R visitAssignExpr(Assign expr);
+    R visitClojureExpr(Clojure expr);
     R visitBinaryExpr(Binary expr);
     R visitCallExpr(Call expr);
     R visitGroupingExpr(Grouping expr);
@@ -26,6 +27,20 @@ abstract class Expr {
 
     final Token name;
     final Expr value;
+  }
+  static class Clojure extends Expr {
+    Clojure(List<Token> params, List<Stmt> body) {
+      this.params = params;
+      this.body = body;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitClojureExpr(this);
+    }
+
+    final List<Token> params;
+    final List<Stmt> body;
   }
   static class Binary extends Expr {
     Binary(Expr left, Token operator, Expr right) {

@@ -26,13 +26,21 @@ class Parser {
     }
 
     private Expr expression() {
+        if (match(TokenType.FUN)) {
+            return clojure();
+        }
         return assignment();
     }
 
     private Stmt declaration() {
         try {
-            if (match(TokenType.FUN))
-                return function("function");
+            if (match(TokenType.FUN)) {
+                if (check(TokenType.IDENTIFIER)) {
+                    return function("function");
+                } else {
+                    back();
+                }
+            }
             if (match(TokenType.VAR))
                 return varDeclaration();
             return statement();
@@ -190,6 +198,26 @@ class Parser {
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
         return statements;
+    }
+
+    private Expr.Clojure clojure() {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after clojure.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.add(
+                        consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+
+        consume(TokenType.LEFT_BRACE, "Expect '{' before clojure body.");
+        List<Stmt> body = block();
+        return new Expr.Clojure(parameters, body);
     }
 
     private Expr assignment() {
@@ -380,6 +408,12 @@ class Parser {
         if (!isAtEnd())
             current++;
         return previous();
+    }
+
+    private Token back() {
+        if (current > 0)
+            current--;
+        return peek();
     }
 
     private boolean isAtEnd() {
