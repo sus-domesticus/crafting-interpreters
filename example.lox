@@ -5,9 +5,13 @@ fun thrice(fn) {
 }
 
 thrice(fun (a) {
-  print a;
+  var lmao = fun (a) {
+    var a = "local";
+    print a;
+  };
+  lmao(a);
 });
 fun () {};
-// "1".
-// "2".
-// "3".
+// "local".
+// "local".
+// "local".
