@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-// TODO: do the challenges [here](https://craftinginterpreters.com/functions.html#function-calls).
+// TODO: continue [here](https://craftinginterpreters.com/resolving-and-binding.html).
 class Parser {
     private static class ParseError extends RuntimeException {
     }
