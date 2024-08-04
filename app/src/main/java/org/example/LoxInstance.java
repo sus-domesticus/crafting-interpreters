@@ -20,6 +20,10 @@ class LoxInstance {
         if (method != null)
             return method.bind(this);
 
+        LoxGetter getter = klass.findGetter(name.lexeme);
+        if (getter != null)
+            return getter.bind(this);
+
         throw new RuntimeError(name,
                 "Undefined property '" + name.lexeme + "'.");
     }

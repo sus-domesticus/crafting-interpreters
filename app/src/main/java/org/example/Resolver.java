@@ -17,6 +17,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private enum FunctionType {
         NONE,
         FUNCTION,
+        GETTER,
         INITIALIZER,
         METHOD
     }
@@ -54,6 +55,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             }
 
             resolveFunction(method, declaration);
+        }
+
+        for (Stmt.Getter getter : stmt.getters) {
+            resolveGetter(getter);
         }
 
         endScope();
@@ -225,6 +230,15 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         expr.accept(this);
     }
 
+    private void resolveGetter(Stmt.Getter getter) {
+        FunctionType enclosingFunction = currentFunction;
+        currentFunction = FunctionType.GETTER;
+        beginScope();
+        resolve(getter.body);
+        endScope();
+        currentFunction = enclosingFunction;
+    }
+
     private void resolveFunction(
             Stmt.Function function, FunctionType type) {
         FunctionType enclosingFunction = currentFunction;
@@ -273,5 +287,11 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
                 return;
             }
         }
+    }
+
+    @Override
+    public Void visitGetterStmt(Stmt.Getter stmt) {
+        App.error(stmt.name, "Impossible.");
+        return null;
     }
 }

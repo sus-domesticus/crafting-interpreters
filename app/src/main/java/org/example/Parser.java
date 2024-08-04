@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-// TODO: do the challenges [here](https://craftinginterpreters.com/classes.html).
+// TODO: finished challenge 2 (continue [here](https://craftinginterpreters.com/classes.html)).
 class Parser {
     private static class ParseError extends RuntimeException {
     }
@@ -49,13 +49,21 @@ class Parser {
         consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
 
         List<Stmt.Function> methods = new ArrayList<>();
+        List<Stmt.Getter> getters = new ArrayList<>();
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            methods.add(function("method"));
+            consume(TokenType.IDENTIFIER, "Expect method or getter name.");
+            if (check(TokenType.LEFT_PAREN)) {
+                back();
+                methods.add(function("method"));
+            } else {
+                back();
+                getters.add(getter());
+            }
         }
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
 
-        return new Stmt.Class(name, methods);
+        return new Stmt.Class(name, methods, getters);
     }
 
     private Stmt statement() {
@@ -174,6 +182,13 @@ class Parser {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
+    }
+
+    private Stmt.Getter getter() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect getter name.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' before getter body.");
+        List<Stmt> body = block();
+        return new Stmt.Getter(name, body);
     }
 
     private Stmt.Function function(String kind) {
@@ -407,6 +422,12 @@ class Parser {
         if (!isAtEnd())
             current++;
         return previous();
+    }
+
+    private Token back() {
+        if (current > 0)
+            current--;
+        return peek();
     }
 
     private boolean isAtEnd() {

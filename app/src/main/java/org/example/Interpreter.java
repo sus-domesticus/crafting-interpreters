@@ -127,7 +127,13 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             methods.put(method.name.lexeme, function);
         }
 
-        LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+        Map<String, LoxGetter> getters = new HashMap<>();
+        for (Stmt.Getter getter : stmt.getters) {
+            LoxGetter loxGetter = new LoxGetter(getter, environment);
+            getters.put(getter.name.lexeme, loxGetter);
+        }
+
+        LoxClass klass = new LoxClass(stmt.name.lexeme, methods, getters);
         environment.assign(stmt.name, klass);
         return null;
     }
@@ -292,7 +298,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Object visitGetExpr(Expr.Get expr) {
         Object object = evaluate(expr.object);
         if (object instanceof LoxInstance) {
-            return ((LoxInstance) object).get(expr.name);
+            Object resultObj = ((LoxInstance) object).get(expr.name);
+            if (resultObj instanceof LoxGetter) {
+                return ((LoxGetter) resultObj).execute(this);
+            }
+            return resultObj;
         }
 
         throw new RuntimeError(expr.name,
@@ -379,5 +389,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         return object.toString();
+    }
+
+    @Override
+    public Void visitGetterStmt(Stmt.Getter stmt) {
+        throw new RuntimeError(stmt.name, "Impossible.");
     }
 }
