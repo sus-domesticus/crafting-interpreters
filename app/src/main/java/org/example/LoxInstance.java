@@ -16,9 +16,14 @@ class LoxInstance {
             return fields.get(name.lexeme);
         }
 
-        LoxFunction method = klass.findMethod(name.lexeme);
-        if (method != null)
-            return method.bind(this);
+        if (klass != null) {
+            LoxFunction method = klass.findMethod(name.lexeme);
+            if (method != null)
+                return method.bind(this);
+        } else {
+            throw new RuntimeError(name, "Undefined static method '" +
+                    name.lexeme + "'.");
+        }
 
         throw new RuntimeError(name,
                 "Undefined property '" + name.lexeme + "'.");
@@ -26,6 +31,10 @@ class LoxInstance {
 
     void set(Token name, Object value) {
         fields.put(name.lexeme, value);
+    }
+
+    void set(String lexeme, Object value) {
+        fields.put(lexeme, value);
     }
 
     @Override

@@ -3,13 +3,18 @@ package org.example;
 import java.util.List;
 import java.util.Map;
 
-class LoxClass implements LoxCallable {
+class LoxClass extends LoxInstance implements LoxCallable {
     final String name;
     private final Map<String, LoxFunction> methods;
 
-    LoxClass(String name, Map<String, LoxFunction> methods) {
+    LoxClass(String name, Map<String, LoxFunction> methods, Map<String, LoxFunction> staticMethods) {
+        super(null);
         this.name = name;
         this.methods = methods;
+
+        for (Map.Entry<String, LoxFunction> staticMethod : staticMethods.entrySet()) {
+            set(staticMethod.getKey(), staticMethod.getValue());
+        }
     }
 
     LoxFunction findMethod(String name) {

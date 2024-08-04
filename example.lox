@@ -2,7 +2,15 @@ class Foo {
   init() {
     print this;
   }
+
+  class printHello(what) {
+    print "hello " + what;
+  }
+
+  class squareroot(n) {
+    return n * n;
+  }
 }
 
-var foo = Foo();
-print foo.init();
+Foo.printHello(Foo.squareroot(4));
+Foo.nonexistant();

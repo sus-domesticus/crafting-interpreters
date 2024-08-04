@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-// TODO: do the challenges [here](https://craftinginterpreters.com/classes.html).
+// TODO: challenge 1 finished (continue [here](https://craftinginterpreters.com/classes.html)).
 class Parser {
     private static class ParseError extends RuntimeException {
     }
@@ -49,13 +49,18 @@ class Parser {
         consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
 
         List<Stmt.Function> methods = new ArrayList<>();
+        List<Stmt.Function> staticMethods = new ArrayList<>();
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            methods.add(function("method"));
+            if (match(TokenType.CLASS)) {
+                staticMethods.add(function("static_method"));
+            } else {
+                methods.add(function("method"));
+            }
         }
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
 
-        return new Stmt.Class(name, methods);
+        return new Stmt.Class(name, methods, staticMethods);
     }
 
     private Stmt statement() {
