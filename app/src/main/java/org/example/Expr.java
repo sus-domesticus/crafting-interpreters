@@ -64,9 +64,10 @@ abstract class Expr {
     final List<Expr> arguments;
   }
   static class Get extends Expr {
-    Get(Expr object, Token name) {
+    Get(Expr object, Token name, Boolean isSafe) {
       this.object = object;
       this.name = name;
+      this.isSafe = isSafe;
     }
 
     @Override
@@ -76,6 +77,7 @@ abstract class Expr {
 
     final Expr object;
     final Token name;
+    final Boolean isSafe;
   }
   static class Grouping extends Expr {
     Grouping(Expr expression) {

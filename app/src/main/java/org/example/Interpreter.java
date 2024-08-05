@@ -330,6 +330,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitGetExpr(Expr.Get expr) {
         Object object = evaluate(expr.object);
+        if (expr.isSafe && object == null) {
+            return null;
+        }
         if (object instanceof LoxInstance) {
             return ((LoxInstance) object).get(expr.name);
         }

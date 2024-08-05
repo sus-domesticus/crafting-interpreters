@@ -11,4 +11,4 @@ class BostonCream < Doughnut {
   }
 }
 
-BostonCream().cook();
+print BostonCream().cook()?.stein;

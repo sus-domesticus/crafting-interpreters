@@ -324,10 +324,15 @@ class Parser {
         while (true) {
             if (match(TokenType.LEFT_PAREN)) {
                 expr = finishCall(expr);
+            } else if (match(TokenType.QUESTION_MARK)) {
+                consume(TokenType.DOT, "Expect '.' after '?'.");
+                Token name = consume(TokenType.IDENTIFIER,
+                        "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name, true);
             } else if (match(TokenType.DOT)) {
                 Token name = consume(TokenType.IDENTIFIER,
                         "Expect property name after '.'.");
-                expr = new Expr.Get(expr, name);
+                expr = new Expr.Get(expr, name, false);
             } else {
                 break;
             }
