@@ -22,6 +22,10 @@ class LoxFunction implements LoxCallable {
                 isInitializer);
     }
 
+    Stmt.Function getDeclaration() {
+        return declaration;
+    }
+
     @Override
     public int arity() {
         return declaration.params.size();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     final Environment globals = new Environment();
@@ -136,14 +137,71 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitInterfaceStmt(Stmt.Interface stmt) {
+        Map<String, LoxFunctionDecl> functionDecls = new HashMap<>();
+        for (Stmt.FunctionDecl functionDecl : stmt.functionDecls) {
+            LoxFunctionDecl function = new LoxFunctionDecl(functionDecl);
+            functionDecls.put(functionDecl.name.lexeme, function);
+        }
+        environment.define(stmt.name.lexeme,
+                new LoxInterface(stmt.name.lexeme, functionDecls));
+        return null;
+    }
+
+    @Override
+    public Void visitFunctionDeclStmt(Stmt.FunctionDecl stmt) {
+        throw new RuntimeError(stmt.name, "Cannot have a function declaration (without body) outside an interface");
+    }
+
+    private void checkClassWithInterface(Stmt.Class clazz, LoxInterface loxInterface,
+            List<LoxFunction> ancestorMethods) {
+        for (LoxFunctionDecl functionDecl : loxInterface.getFunctionDecls()) {
+            List<Stmt.Function> methods = clazz.methods;
+            Stmt.Function method = null;
+            for (Stmt.Function other : Stream.concat(methods.stream(),
+                    ancestorMethods.stream().map(ancestorMethod -> ancestorMethod.getDeclaration())).toList()) {
+                if (other.name.lexeme.equals(functionDecl.name())) {
+                    method = other;
+                    break;
+                }
+            }
+            if (method == null) {
+                throw new RuntimeError(clazz.name, "Class must contain the method " + functionDecl.name()
+                        + " from interface " + loxInterface.name());
+            }
+            if (method.params.size() != functionDecl.params().size()) {
+                throw new RuntimeError(method.name,
+                        "Method must have the same number of parameters as the function from the interface "
+                                + loxInterface.name());
+            }
+        }
+    }
+
+    @Override
     public Void visitClassStmt(Stmt.Class stmt) {
         Object superclass = null;
+        List<LoxFunction> ancestorMethods = new ArrayList<>();
         if (stmt.superclass != null) {
             superclass = evaluate(stmt.superclass);
             if (!(superclass instanceof LoxClass)) {
                 throw new RuntimeError(stmt.superclass.name,
                         "Superclass must be a class.");
             }
+            LoxClass loxClass = (LoxClass) superclass;
+            ancestorMethods = loxClass.getAllMethods();
+        }
+
+        List<LoxInterface> loxInterfaces = new ArrayList<>();
+        for (Expr.Variable interfaceName : stmt.interfaceNames) {
+            Object loxInterface = evaluate(interfaceName);
+            if (!(loxInterface instanceof LoxInterface)) {
+                throw new RuntimeError(stmt.superclass.name,
+                        "Interface names must be a interfaces.");
+            }
+            loxInterfaces.add((LoxInterface) loxInterface);
+        }
+        for (LoxInterface loxInterface : loxInterfaces) {
+            checkClassWithInterface(stmt, loxInterface, ancestorMethods);
         }
 
         environment.define(stmt.name.lexeme, null);

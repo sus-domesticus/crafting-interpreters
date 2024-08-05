@@ -18,6 +18,7 @@ import static org.example.TokenType.GREATER;
 import static org.example.TokenType.GREATER_EQUAL;
 import static org.example.TokenType.IDENTIFIER;
 import static org.example.TokenType.IF;
+import static org.example.TokenType.INTERFACE;
 import static org.example.TokenType.LEFT_BRACE;
 import static org.example.TokenType.LEFT_PAREN;
 import static org.example.TokenType.LESS;
@@ -54,6 +55,7 @@ class Scanner {
         keywords = new HashMap<>();
         keywords.put("and", AND);
         keywords.put("class", CLASS);
+        keywords.put("interface", INTERFACE);
         keywords.put("else", ELSE);
         keywords.put("false", FALSE);
         keywords.put("for", FOR);

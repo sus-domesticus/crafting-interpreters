@@ -6,7 +6,9 @@ abstract class Stmt {
   interface Visitor<R> {
     R visitBlockStmt(Block stmt);
     R visitClassStmt(Class stmt);
+    R visitInterfaceStmt(Interface stmt);
     R visitExpressionStmt(Expression stmt);
+    R visitFunctionDeclStmt(FunctionDecl stmt);
     R visitFunctionStmt(Function stmt);
     R visitIfStmt(If stmt);
     R visitPrintStmt(Print stmt);
@@ -27,9 +29,10 @@ abstract class Stmt {
     final List<Stmt> statements;
   }
   static class Class extends Stmt {
-    Class(Token name, Expr.Variable superclass, List<Stmt.Function> methods) {
+    Class(Token name, Expr.Variable superclass, List<Expr.Variable> interfaceNames, List<Stmt.Function> methods) {
       this.name = name;
       this.superclass = superclass;
+      this.interfaceNames = interfaceNames;
       this.methods = methods;
     }
 
@@ -40,7 +43,22 @@ abstract class Stmt {
 
     final Token name;
     final Expr.Variable superclass;
+    final List<Expr.Variable> interfaceNames;
     final List<Stmt.Function> methods;
+  }
+  static class Interface extends Stmt {
+    Interface(Token name, List<Stmt.FunctionDecl> functionDecls) {
+      this.name = name;
+      this.functionDecls = functionDecls;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitInterfaceStmt(this);
+    }
+
+    final Token name;
+    final List<Stmt.FunctionDecl> functionDecls;
   }
   static class Expression extends Stmt {
     Expression(Expr expression) {
@@ -53,6 +71,20 @@ abstract class Stmt {
     }
 
     final Expr expression;
+  }
+  static class FunctionDecl extends Stmt {
+    FunctionDecl(Token name, List<Token> params) {
+      this.name = name;
+      this.params = params;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitFunctionDeclStmt(this);
+    }
+
+    final Token name;
+    final List<Token> params;
   }
   static class Function extends Stmt {
     Function(Token name, List<Token> params, List<Stmt> body) {

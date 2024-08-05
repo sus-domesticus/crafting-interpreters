@@ -1,4 +1,10 @@
-class Doughnut {
+class Object { }
+
+interface Lmao {
+  cook()
+}
+
+class Doughnut < Object, Lmao {
   cook() {
     print "Fry until golden brown.";
   }
@@ -10,5 +16,34 @@ class BostonCream < Doughnut {
     print "Pipe full of custard and coat with chocolate.";
   }
 }
+
+class A {
+
+}
+
+interface IA {
+  printfun(a, b)
+}
+
+class B < A, IA {
+  printfun(a, b) {
+    print a + b;
+  }
+}
+
+class C < B {
+
+}
+
+class D < B, IA {
+  printfun(a, b) {
+      print a;
+  }
+}
+
+var xd = D();
+xd.printfun(3, 4);
+xd = B();
+xd.printfun("abc", 44);
 
 BostonCream().cook();

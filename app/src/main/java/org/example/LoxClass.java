@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 class LoxClass implements LoxCallable {
     final String name;
@@ -24,6 +25,13 @@ class LoxClass implements LoxCallable {
         }
 
         return null;
+    }
+
+    List<LoxFunction> getAllMethods() {
+        if (superclass == null) {
+            return methods.values().stream().toList();
+        }
+        return Stream.concat(methods.values().stream(), superclass.getAllMethods().stream()).toList();
     }
 
     @Override

@@ -31,6 +31,8 @@ class Parser {
 
     private Stmt declaration() {
         try {
+            if (match(TokenType.INTERFACE))
+                return interfaceDeclaration();
             if (match(TokenType.CLASS))
                 return classDeclaration();
             if (match(TokenType.FUN))
@@ -44,13 +46,34 @@ class Parser {
         }
     }
 
+    private Stmt interfaceDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect interface name.");
+
+        consume(TokenType.LEFT_BRACE, "Expect '{' before interface body.");
+
+        List<Stmt.FunctionDecl> functionDecls = new ArrayList<>();
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            functionDecls.add(functionDecl());
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after interface body.");
+
+        return new Stmt.Interface(name, functionDecls);
+    }
+
     private Stmt classDeclaration() {
         Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
 
         Expr.Variable superclass = null;
+        List<Expr.Variable> interfaceNames = new ArrayList<>();
         if (match(TokenType.LESS)) {
             consume(TokenType.IDENTIFIER, "Expect superclass name.");
             superclass = new Expr.Variable(previous());
+
+            while (match(TokenType.COMMA)) {
+                consume(TokenType.IDENTIFIER, "Expect interface name after ','.");
+                interfaceNames.add(new Expr.Variable(previous()));
+            }
         }
 
         consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
@@ -62,7 +85,7 @@ class Parser {
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
 
-        return new Stmt.Class(name, superclass, methods);
+        return new Stmt.Class(name, superclass, interfaceNames, methods);
     }
 
     private Stmt statement() {
@@ -181,6 +204,24 @@ class Parser {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
+    }
+
+    private Stmt.FunctionDecl functionDecl() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect function name.");
+        consume(TokenType.LEFT_PAREN, "Expect '(' after function name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.add(
+                        consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+        return new Stmt.FunctionDecl(name, parameters);
     }
 
     private Stmt.Function function(String kind) {

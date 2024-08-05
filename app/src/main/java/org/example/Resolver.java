@@ -24,7 +24,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private enum ClassType {
         NONE,
         CLASS,
-        SUBCLASS
+        SUBCLASS,
+        INTERFACE // IMPOSTER
     }
 
     private ClassType currentClass = ClassType.NONE;
@@ -34,6 +35,19 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         beginScope();
         resolve(stmt.statements);
         endScope();
+        return null;
+    }
+
+    @Override
+    public Void visitInterfaceStmt(Stmt.Interface stmt) {
+        declare(stmt.name);
+        define(stmt.name);
+        return null;
+    }
+
+    @Override
+    public Void visitFunctionDeclStmt(Stmt.FunctionDecl stmt) {
+        App.error(stmt.name, "Cannot have a function declaration (without body) outside an interface");
         return null;
     }
 
@@ -59,6 +73,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         if (stmt.superclass != null) {
             beginScope();
             scopes.peek().put("super", true);
+        }
+
+        for (Expr.Variable interfaceName : stmt.interfaceNames) {
+            resolve(interfaceName);
         }
 
         beginScope();
